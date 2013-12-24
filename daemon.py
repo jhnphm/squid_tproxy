@@ -5,17 +5,17 @@
 # foundation; either version 2 of the license, or (at your option) any later
 # version. 
 
+# external non-python core dependencies
+import redis
 import nflog
-
-from socket import AF_BRIDGE, AF_INET, AF_INET6, inet_ntoa, ntohs
 from dpkt import dpkt,ip,udp,dhcp
 
 import array
 import struct 
 import subprocess
 import time
-import redis
 import os
+from socket import AF_BRIDGE, AF_INET, AF_INET6, inet_ntoa, ntohs
 
 REDIS_PREFIX="macaddr_rw_"
 PRINT_DEBUG = True
@@ -38,7 +38,7 @@ def reload_state():
         macaddr = r.get(i)
         ip = i[len(REDIS_PREFIX):]
         add_rule(ip,macaddr)
-
+# Updates ebtables rules if 
 def update_rule(ip_addr,mac_addr):
     old_mac_addr = r.get(REDIS_PREFIX + ip_addr)
     # Purge existing rules if ip address changes
@@ -169,10 +169,13 @@ if __name__ == '__main__':
         # log.try_run blocks :|, but tproxy ideally should run after try_run.
         # This is ugly
         subprocess.Popen("sleep 5; ./squid_tproxy.sh", shell=True, stdout=FNULL, stderr=subprocess.STDOUT);
+
+        # Listen for nflog events. This blocks until ctrl-c or killed
         log.try_run()
     except KeyboardInterrupt, e:
         print "interrupted"
 
+    #  Reset everything if killed
     subprocess.call("./tproxy_flush.sh", shell=True, stdout=FNULL, stderr=subprocess.STDOUT);
     log.unbind(AF_BRIDGE)
     log.close()
