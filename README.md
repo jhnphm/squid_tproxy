@@ -25,7 +25,7 @@ Script Setup
 
 Dependencies
 ------------
-ebtables, iptables, redis, python-nflog, python-dpkt 
+ebtables, iptables, sh, iproute2, gawk, redis, python-nflog, python-dpkt
 
 Config Files
 ------------
