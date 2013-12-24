@@ -41,7 +41,7 @@ def reload_state():
 # Updates ebtables rules if 
 def update_rule(ip_addr,mac_addr):
     old_mac_addr = r.get(REDIS_PREFIX + ip_addr)
-    # Purge existing rules if ip address changes
+    # Only update rule if ip address<->mac changes, to avoid duplicate rules and unnecessary modification of ebtables
     if old_mac_addr != mac_addr:
         del_rule(ip_addr,old_mac_addr)
         add_rule(ip_addr,mac_addr)
