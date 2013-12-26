@@ -1,21 +1,19 @@
 #! /usr/bin/python
 
-# this program is free software; you can redistribute it and/or modify it under
-# the terms of the gnu general public license as published by the free software
-# foundation; either version 2 of the license, or (at your option) any later
-# version. 
-
 import nflog
 
 from socket import AF_BRIDGE, AF_INET, AF_INET6, inet_ntoa, ntohs
 from dpkt import dpkt,ip,udp,dhcp
 
 import array
+import config
+import os
+import re
+import redis
 import struct 
 import subprocess
+import tempfile
 import time
-import redis
-import os
 
 REDIS_PREFIX="macaddr_rw_"
 PRINT_DEBUG = True
@@ -31,6 +29,17 @@ def register_addr(ip_addr,mac_addr,expire_time):
     #register w/ reddis
     r.set(REDIS_PREFIX + ip_addr, mac_addr)
     update_rule(ip_addr,mac_addr)
+
+def bootstrap():
+    tmpfile = tempfile.TemporaryFile()
+    subprocess.call("ssh "+config.ROUTER+ " ip hotspot host print", shell=True, stdout=tmpfile);
+    tmpfile.seek(0)
+    output = tmpfile.read()
+    kkkkkkkkkkkk
+
+
+
+
 
 def reload_state():
     keys = r.keys(REDIS_PREFIX+"*")
@@ -143,6 +152,7 @@ def callback(payload):
 
     register_addr(inet_ntoa(pkt.dst),format_mac(mac_addr),expire_time)
         
+bootstrap()
 
 if __name__ == '__main__':
     r = redis.Redis(unix_socket_path='/var/run/redis/redis.sock')
