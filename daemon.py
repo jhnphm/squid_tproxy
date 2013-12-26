@@ -37,11 +37,34 @@ def register_addr(ip_addr,mac_addr,expire_time):
     r.set(REDIS_PREFIX + ip_addr, mac_addr)
     update_rule(ip_addr,mac_addr)
 
-def bootstrap():
+
+def bootstrap_mikrotik(router):
     tmpfile = tempfile.TemporaryFile()
-    subprocess.call("ssh "+config.ROUTER+ " ip hotspot host print", shell=True, stdout=tmpfile);
+    subprocess.call("ssh "+router+" ip hotspot host print detail", shell=True,
+            stdout=tmpfile)
     tmpfile.seek(0)
     output = tmpfile.read()
+    macgrep = re.compile("""\s(\d?)\s*[ADPHS]* mac-address=([0-9A-Z:]*) address=([0-9\.]*) to-address=([0-9\.]*)""")
+    entries = macgrep.findall(output, re.MULTILINE)
+    for i in entries:
+        if i[2] != i[3]: # mikrotek is doing some weird natty shit, 
+            del_rule(i[2])
+            if PRINT_DEBUG:
+                print "Mikrotik fucking up something"
+                print i
+        print "Adding "+i[2]+"<->"+i[1]+"..."
+        r.set(REDIS_PREFIX + i[2], i[1])
+        
+        
+            
+
+
+
+def bootstrap():
+    bootstrap_mikrotik(config.ROUTER)
+
+    
+
 
 
 def reload_state():
@@ -81,7 +104,10 @@ def add_rule(ip_addr,mac_addr):
     subprocess.Popen(args, stdout=FNULL, stderr=subprocess.STDOUT)
 
 # Remove mapping
-def del_rule(ip_addr,mac_addr):
+def del_rule(ip_addr,mac_addr=None):
+    if mac_addr==None:
+        mac_addr = r.get(REDIS_PREFIX + ip_addr)
+
     args = ('ebtables'       , 
         '-t'                 , 
         'nat'                , 
@@ -156,19 +182,20 @@ def callback(payload):
 
     register_addr(inet_ntoa(pkt.dst),format_mac(mac_addr),expire_time)
         
-bootstrap()
 
 if __name__ == '__main__':
     r = redis.Redis(unix_socket_path='/var/run/redis/redis.sock')
 
     # Flush any possible broken rules
-    subprocess.call("./tproxy_flush.sh", shell=True, stdout=FNULL, stderr=subprocess.STDOUT);
+    subprocess.call("./tproxy_flush.sh", stdout=FNULL, stderr=subprocess.STDOUT);
 
     # Configures kernel parameters, etc
-    subprocess.call("./setup.sh", shell=True, stdout=FNULL, stderr=subprocess.STDOUT);
+    subprocess.call("./setup.sh", stdout=FNULL, stderr=subprocess.STDOUT);
 
     # Enable ebtables rewriting chains first before enabling tproxy
-    subprocess.call("./ebtables_rewrite.sh", shell=True, stdout=FNULL, stderr=subprocess.STDOUT);
+    subprocess.call("./ebtables_rewrite.sh", stdout=FNULL, stderr=subprocess.STDOUT);
+
+
 
     # Enable callbacks for rewriting macs
     log = nflog.log()
@@ -176,6 +203,7 @@ if __name__ == '__main__':
 
     log.fast_open(1, AF_BRIDGE)
 
+    bootstrap()
     reload_state()
 
     try:
@@ -190,7 +218,7 @@ if __name__ == '__main__':
         print "interrupted"
 
     #  Reset everything if killed
-    subprocess.call("./tproxy_flush.sh", shell=True, stdout=FNULL, stderr=subprocess.STDOUT);
+    subprocess.call("./tproxy_flush.sh", stdout=FNULL, stderr=subprocess.STDOUT);
     log.unbind(AF_BRIDGE)
     log.close()
 

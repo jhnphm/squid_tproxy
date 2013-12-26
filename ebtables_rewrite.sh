@@ -16,5 +16,5 @@ ebtables -t filter -A FORWARD -i $INET_IFACE -p ipv4 --ip-proto udp --ip-dport 6
 
 # Create chain for adding mac address rewriting rules
 ebtables -t nat -N TPROXY_MACADDR_FIX -P RETURN
-ebtables -t nat -A POSTROUTING -o $INET_IFACE -s $BRIDGE_MAC -p ipv4 -ip-proto tcp --ip-dport 80 -j TPROXY_MACADDR_FIX
+ebtables -t nat -A POSTROUTING -o $INET_IFACE -s $BRIDGE_MAC -p ipv4 --ip-proto tcp --ip-dport 80 -j TPROXY_MACADDR_FIX
 
