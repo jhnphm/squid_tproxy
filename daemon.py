@@ -1,6 +1,6 @@
 #! /usr/bin/python
 
-# this program is free software; you can redistribute it and/or modify it under
+# This program is free software; you can redistribute it and/or modify it under
 # the terms of the gnu general public license as published by the free software
 # foundation; either version 2 of the license, or (at your option) any later
 # version. 
@@ -42,10 +42,6 @@ def bootstrap():
     subprocess.call("ssh "+config.ROUTER+ " ip hotspot host print", shell=True, stdout=tmpfile);
     tmpfile.seek(0)
     output = tmpfile.read()
-    kkkkkkkkkkkk
-
-
-
 
 
 def reload_state():

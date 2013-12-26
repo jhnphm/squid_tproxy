@@ -1,4 +1,4 @@
-squid_tproxy
+squid tproxy
 ============
 
 Scripts for setting up fully layer 2 transparent squid proxying. 
