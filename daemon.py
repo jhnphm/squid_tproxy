@@ -6,16 +6,21 @@
 # version. 
 
 # external non-python core dependencies
+from dpkt import dpkt,ip,udp,dhcp
 import redis
 import nflog
-from dpkt import dpkt,ip,udp,dhcp
+
+from socket import AF_BRIDGE, AF_INET, AF_INET6, inet_ntoa, ntohs
+
 
 import array
+import config
+import os
+import re
 import struct 
 import subprocess
+import tempfile
 import time
-import os
-from socket import AF_BRIDGE, AF_INET, AF_INET6, inet_ntoa, ntohs
 
 REDIS_PREFIX="macaddr_rw_"
 PRINT_DEBUG = True
@@ -32,13 +37,25 @@ def register_addr(ip_addr,mac_addr,expire_time):
     r.set(REDIS_PREFIX + ip_addr, mac_addr)
     update_rule(ip_addr,mac_addr)
 
+def bootstrap():
+    tmpfile = tempfile.TemporaryFile()
+    subprocess.call("ssh "+config.ROUTER+ " ip hotspot host print", shell=True, stdout=tmpfile);
+    tmpfile.seek(0)
+    output = tmpfile.read()
+    kkkkkkkkkkkk
+
+
+
+
+
 def reload_state():
     keys = r.keys(REDIS_PREFIX+"*")
     for i in keys:
         macaddr = r.get(i)
         ip = i[len(REDIS_PREFIX):]
         add_rule(ip,macaddr)
-# Updates ebtables rules if 
+
+# Update mac address
 def update_rule(ip_addr,mac_addr):
     old_mac_addr = r.get(REDIS_PREFIX + ip_addr)
     # Only update rule if ip address<->mac changes, to avoid duplicate rules and unnecessary modification of ebtables
@@ -143,6 +160,7 @@ def callback(payload):
 
     register_addr(inet_ntoa(pkt.dst),format_mac(mac_addr),expire_time)
         
+bootstrap()
 
 if __name__ == '__main__':
     r = redis.Redis(unix_socket_path='/var/run/redis/redis.sock')

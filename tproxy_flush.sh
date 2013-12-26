@@ -1,11 +1,6 @@
 #! /bin/sh
 
-# this program is free software; you can redistribute it and/or modify it under
-# the terms of the gnu general public license as published by the free software
-# foundation; either version 2 of the license, or (at your option) any later
-# version. 
-
-. ./config.sh
+. ./config.py
 
 # Flush existing iptables mangle table and routing rules
 iptables -t filter -F 
