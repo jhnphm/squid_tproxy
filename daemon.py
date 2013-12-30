@@ -101,7 +101,7 @@ def add_rule(ip_addr,mac_addr):
         mac_addr             , 
         '--snat-target'      , 
         'ACCEPT')
-    subprocess.Popen(args, stdout=FNULL, stderr=subprocess.STDOUT)
+    subprocess.call(args, stdout=FNULL, stderr=subprocess.STDOUT)
 
 # Remove mapping
 def del_rule(ip_addr,mac_addr=None):
@@ -123,7 +123,7 @@ def del_rule(ip_addr,mac_addr=None):
         mac_addr             , 
         '--snat-target'      , 
         'ACCEPT')
-    subprocess.Popen(args, stdout=FNULL, stderr=subprocess.STDOUT)
+    subprocess.call(args, stdout=FNULL, stderr=subprocess.STDOUT)
 
 # Formats mac addr as string
 def format_mac(mac_addr):
@@ -210,7 +210,7 @@ if __name__ == '__main__':
         # Finally enable tproxy
         # log.try_run blocks :|, but tproxy ideally should run after try_run.
         # This is ugly
-        subprocess.Popen("sleep 5; ./squid_tproxy.sh", shell=True, stdout=FNULL, stderr=subprocess.STDOUT);
+        subprocess.call("sleep 5; ./squid_tproxy.sh", shell=True, stdout=FNULL, stderr=subprocess.STDOUT);
 
         # Listen for nflog events. This blocks until ctrl-c or killed
         log.try_run()
