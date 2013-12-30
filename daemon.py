@@ -184,6 +184,12 @@ def callback(payload):
         
 
 if __name__ == '__main__':
+    # Change CWD to that of script
+    wd = os.path.dirname(os.path.realpath(__file__))
+    os.chdir(wd)
+
+
+
     r = redis.Redis(unix_socket_path='/var/run/redis/redis.sock')
 
     # Flush any possible broken rules
