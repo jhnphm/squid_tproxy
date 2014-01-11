@@ -9,6 +9,7 @@
 
 # Flush existing iptables mangle table and routing rules
 iptables -t filter -F 
+iptables -t filter -X CP_FILTER
 iptables -t mangle -F 
 iptables -t mangle -X DIVERT
 

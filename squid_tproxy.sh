@@ -24,7 +24,6 @@ iptables -t mangle -A PREROUTING -p tcp -m socket -j DIVERT
 iptables -t mangle -A PREROUTING -p tcp --dport 80 -j TPROXY --tproxy-mark 0x1/0x1 --on-port 3129
 
 # Change MAC target address to local bridge
-# Then drop all ethernet frames that are being TPROXIED so that they don't pass onto internet and become redundant
 ebtables -t broute -A BROUTING \
         -i $CLIENT_IFACE -p ipv4 --ip-proto tcp --ip-dport 80 \
         -j redirect --redirect-target DROP
