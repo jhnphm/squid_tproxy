@@ -4,6 +4,9 @@ squid tproxy
 Scripts for setting up fully layer 2 transparent squid proxying. 
 See http://wiki.squid-cache.org/Features/Tproxy4
 
+This was intended to enable transparent squid without breaking captive portals
+upstream of the Squid box at MAGFest. 
+
 
 Network Setup
 =============
